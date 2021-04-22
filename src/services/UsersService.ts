@@ -1,4 +1,5 @@
-import { getCustomRepository } from "typeorm";
+import { getCustomRepository, Repository } from "typeorm";
+import { User } from "../entities/User";
 import { UsersRepository } from "../repositories/UsersRepository";
 
 interface ICreateUser {
@@ -6,10 +7,16 @@ interface ICreateUser {
 }
 
 class UsersService {
+
+  private usersRepository : Repository<User>
+
+  constructor() {
+    this.usersRepository = getCustomRepository(UsersRepository);
+  }
+
   async create({ email } : ICreateUser) {
-    const usersRepository = getCustomRepository(UsersRepository);
     
-    const userExists = await usersRepository.findOne({
+    const userExists = await this.usersRepository.findOne({
       email
     })
 
@@ -17,11 +24,11 @@ class UsersService {
       throw new Error("User already exists!")
     }
 
-    const  user = usersRepository.create({
+    const  user = this.usersRepository.create({
       email
     });
     
-    await usersRepository.save(user);
+    await this.usersRepository.save(user);
       
     return user;
   }
